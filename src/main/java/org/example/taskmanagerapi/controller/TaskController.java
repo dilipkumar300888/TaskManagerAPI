@@ -4,7 +4,9 @@ import org.example.taskmanagerapi.model.Task;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,7 +28,7 @@ public class TaskController {
         List<Task> result = tasks.values().stream()
                 .filter(task -> completed == null || task.isCompleted() == completed)
                 .collect(Collectors.toList());
-        
+
         return ResponseEntity.ok(result);
     }
 
@@ -35,7 +37,7 @@ public class TaskController {
     public ResponseEntity<?> getTaskById(@PathVariable int id) {
 
         Task possibleTask = tasks.get(id);
-        
+
         if (possibleTask == null) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -49,35 +51,37 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<?> createTask(@RequestBody Task task) {
 
+        System.out.println("Received task: " + task.getTitle()); // Debug what's actually received
+
         //TO-DO : Make it thread safe, maybe atomics?
         idCounter++;
-        task.setId(newId);
-        tasks.put(newId, task);
-        
+        task.setId(idCounter);
+        tasks.put(idCounter, task);
+
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(newId)
+                .buildAndExpand(idCounter)
                 .toUri();
-        
+
         return ResponseEntity.created(location).body(task);
     }
 
     // PUT /api/v1/tasks/id
     @PutMapping("/{id}")
-    public String updateTask(@PathVariable int id, @RequestBody Task task) {
+    public ResponseEntity<?> updateTask(@PathVariable int id, @RequestBody Task task) {
 
-        if (task.getId() != null && task.getId() != id) {
+        if (task.getId() != 0 && task.getId() != id) {
             return ResponseEntity.badRequest()
                     .body("Path ID and task ID must match");
         }
-        
+
         if (!tasks.containsKey(id)) {
             return ResponseEntity.notFound().build();
             // There will not be case where task id was not set, as the server is responsible to set it.
         }
-        
+
         tasks.put(id, task);
-        
+
         return ResponseEntity.ok(task);
     }
 
@@ -85,7 +89,7 @@ public class TaskController {
 
     // DELETE /api/v1/tasks/id
     @DeleteMapping("/{id}")
-    public String deleteTask(@PathVariable int id) {
+    public ResponseEntity<Void> deleteTask(@PathVariable int id) {
 
         Task removedTask = tasks.remove(id);
 
@@ -94,4 +98,5 @@ public class TaskController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
 }

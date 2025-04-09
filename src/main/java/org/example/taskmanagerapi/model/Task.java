@@ -2,12 +2,14 @@ package org.example.taskmanagerapi.model;
 
 public class Task {
     private int id;
+    private String title;
     private String description;
     private boolean completed;
 
     public Task() {}
-    public Task(int id, String description, boolean completed) {
+    public Task(int id, String title, String description, boolean completed) {
         this.id = id;
+        this.title = title;
         this.description = description;
         this.completed = completed;
     }
@@ -26,6 +28,14 @@ public class Task {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public boolean isCompleted() {
