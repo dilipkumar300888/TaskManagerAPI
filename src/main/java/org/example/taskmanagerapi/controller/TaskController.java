@@ -92,6 +92,7 @@ public class TaskController {
     public ResponseEntity<Void> deleteTask(@PathVariable int id) {
 
         Task removedTask = tasks.remove(id);
+        //TO-DO enhance id generator logic to give back this id to pool
 
         if (removedTask != null) {
             return ResponseEntity.noContent().build();
